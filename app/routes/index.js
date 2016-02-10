@@ -69,7 +69,11 @@ module.exports = function (app, passport) {
 		
 	function shortenTheUrl(req,res,next){
 		shorturl(req.params.url, function(result) {
-			res.shortenedObject={originalUrl:req.params.url,shortenedUrl:result};
+			if(result===undefined){
+				res.shortenedObject={error:"url invalid"};
+			}else{
+				res.shortenedObject={originalUrl:req.params.url,shortenedUrl:result};
+			}
 			res.shortenedUrl=result;
 			next();
 		});
