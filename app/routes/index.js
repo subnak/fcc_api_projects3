@@ -2,6 +2,7 @@
 
 var path = process.cwd();
 var ClickHandler = require(path + '/app/controllers/clickHandler.server.js');
+var shorturl = require('shorturl');
 
 module.exports = function (app, passport) {
 
@@ -16,9 +17,18 @@ module.exports = function (app, passport) {
 	var clickHandler = new ClickHandler();
 
 	app.route('/')
-		.get(isLoggedIn, function (req, res) {
-			res.sendFile(path + '/public/index.html');
+		.get(function (req, res) {
+			res.render(path + '/public/helloWorld.ejs');
 		});
+		
+	app.route('/:url')
+		.get(shortenTheUrl,function(req,res){
+			console.log("this should be req.baseUrl: "+req.params.url);
+			console.log("this is the shortenedUrl: "+JSON.stringify(res.shortenedObject));
+			res.render(path+'/public/solutionPage.ejs',{
+				shortenedObject:res.shortenedObject
+			});
+		})
 
 	app.route('/login')
 		.get(function (req, res) {
@@ -54,4 +64,16 @@ module.exports = function (app, passport) {
 		.get(isLoggedIn, clickHandler.getClicks)
 		.post(isLoggedIn, clickHandler.addClick)
 		.delete(isLoggedIn, clickHandler.resetClicks);
+		
+		
+		
+	function shortenTheUrl(req,res,next){
+		shorturl(req.params.url, function(result) {
+			res.shortenedObject={originalUrl:req.params.url,shortenedUrl:result};
+			res.shortenedUrl=result;
+			next();
+		});
+		
+	}
+		
 };
